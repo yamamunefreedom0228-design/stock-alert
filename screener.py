@@ -64,7 +64,17 @@ def fetch_universe(markets: list[str]) -> pd.DataFrame:
     resp.raise_for_status()
     df = pd.read_excel(io.BytesIO(resp.content))
     df = df[["コード", "銘柄名", "市場・商品区分", "33業種区分"]].dropna(subset=["コード"])
-    df["コード"] = df["コード"].astype(int).astype(str).str.zfill(4)
+
+    def normalize_code(x):
+        # 2024年以降、証券コードは「130A」のような英数字混在も存在するため
+        # 単純なint変換はできない。数値ならゼロ埋め、文字列ならそのまま使う。
+        if isinstance(x, float) and x.is_integer():
+            return str(int(x)).zfill(4)
+        if isinstance(x, int):
+            return str(x).zfill(4)
+        return str(x).strip().zfill(4)
+
+    df["コード"] = df["コード"].apply(normalize_code)
     df["ticker"] = df["コード"] + ".T"
 
     # 指定した市場区分（プライム/スタンダード/グロースの普通株のみ、ETFやREIT等は除外）
