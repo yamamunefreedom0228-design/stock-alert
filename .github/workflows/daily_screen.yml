@@ -1,0 +1,45 @@
+name: 株価スクリーニング通知(取引時間中)
+
+on:
+  schedule:
+    - cron: "0,30 0-6 * * 1-5"
+  workflow_dispatch: {}
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: JST日付を取得
+        id: date
+        run: echo "jst_date=$(date -u -d '+9 hours' +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: 当日分の通知済み状態を復元
+        uses: actions/cache/restore@v4
+        with:
+          path: state/notified.json
+          key: notify-state-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
+          restore-keys: |
+            notify-state-${{ steps.date.outputs.jst_date }}-
+
+      - name: Pythonをセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 依存パッケージをインストール
+        run: pip install -r requirements.txt
+
+      - name: スクリーニングを実行
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python screener.py
+
+      - name: 通知済み状態を保存(次回実行のため)
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state/notified.json
+          key: notify-state-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
