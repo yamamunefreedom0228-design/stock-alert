@@ -1,0 +1,8 @@
+{
+  "discord_webhook_url": "ここにDiscordのWebhook URLを貼り付けてください（GitHub Actionsで動かす場合はSecrets推奨のため空でもOK）",
+  "budget_yen": 200000,
+  "lot_size": 100,
+  "markets": ["プライム", "スタンダード"],
+  "max_notify": 30,
+  "batch_size": 80
+}
