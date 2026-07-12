@@ -4,5 +4,6 @@
   "lot_size": 100,
   "markets": ["プライム", "スタンダード"],
   "max_notify": 30,
-  "batch_size": 80
+  "batch_size": 150,
+  "batch_sleep_sec": 0.8
 }
