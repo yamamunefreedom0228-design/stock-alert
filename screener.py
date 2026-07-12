@@ -178,7 +178,8 @@ def main():
     lot_size = config.get("lot_size", 100)
     markets = config.get("markets", ["プライム", "スタンダード"])
     max_notify = config.get("max_notify", 30)
-    batch_size = config.get("batch_size", 80)
+    batch_size = config.get("batch_size", 150)
+    batch_sleep_sec = config.get("batch_sleep_sec", 0.8)
 
     universe = fetch_universe(markets)
     name_map = dict(zip(universe["ticker"], universe["銘柄名"]))
@@ -189,7 +190,7 @@ def main():
         batch = tickers[i:i + batch_size]
         print(f"[INFO] {i}/{len(tickers)} 件処理中...")
         all_hits.extend(screen_batch(batch, budget_yen, lot_size))
-        time.sleep(1.5)  # レート制限対策
+        time.sleep(batch_sleep_sec)  # レート制限対策
 
     # 当日すでに通知した(銘柄,シグナル種別)は除外し、新規分だけ通知する
     state = load_state()
