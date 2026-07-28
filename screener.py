@@ -27,6 +27,7 @@ import yfinance as yf
 
 CONFIG_PATH = Path(__file__).parent / "config.json"
 STATE_PATH = Path(__file__).parent / "state" / "notified.json"
+CANDIDATES_PATH = Path(__file__).parent / "state" / "candidates.json"
 JPX_LIST_URL = "https://www.jpx.co.jp/markets/statistics-equities/misc/tvdivq0000001vg2-att/data_j.xls"
 
 
