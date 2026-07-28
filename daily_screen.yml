@@ -25,7 +25,9 @@ jobs:
       - name: 当日分の通知済み状態を復元
         uses: actions/cache/restore@v4
         with:
-          path: state/notified.json
+          path: |
+            state/notified.json
+            state/candidates.json
           key: notify-state-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
           restore-keys: |
             notify-state-${{ steps.date.outputs.jst_date }}-
@@ -46,6 +48,8 @@ jobs:
       - name: 通知済み状態を保存(次回実行のため)
         if: always()
         uses: actions/cache/save@v4
-        with:
-          path: state/notified.json
+       with:
+          path: |
+            state/notified.json
+            state/candidates.json
           key: notify-state-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
