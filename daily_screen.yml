@@ -53,3 +53,10 @@ jobs:
             state/notified.json
             state/candidates.json
           key: notify-state-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
+      - name: 候補銘柄を保存(intraday_watch向け)
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state/candidates.json
+          key: candidates-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
+
