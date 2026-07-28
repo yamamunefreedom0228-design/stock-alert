@@ -214,12 +214,20 @@ def main():
             lines.append(f"　{text}")
 
     print(f"[INFO] 新規該当銘柄数: {len(new_hits)} (総該当 {len(all_hits)})")
+    save_candidates(all_hits, name_map)
     if new_hits:
         send_discord(webhook_url, lines)
     else:
         print("[INFO] 新規シグナルなし。通知をスキップします。")
 
     save_state(state)
+    def save_candidates(hits: list[dict], name_map: dict, limit: int = 15):
+    """シグナル数の多い順に上位を『今日の監視候補』としてintraday_watch.py用に書き出す"""
+    top = sorted(hits, key=lambda h: len(h["signals"]), reverse=True)[:limit]
+    candidates = [{"ticker": h["ticker"], "name": name_map.get(h["ticker"], "")} for h in top]
+    CANDIDATES_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(CANDIDATES_PATH, "w", encoding="utf-8") as f:
+        json.dump(candidates, f, ensure_ascii=False)
 
 
 if __name__ == "__main__":
