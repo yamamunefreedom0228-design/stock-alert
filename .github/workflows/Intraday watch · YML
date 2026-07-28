@@ -1,0 +1,41 @@
+name: エントリータイミング監視(取引時間中・5分おき)
+
+concurrency:
+  group: intraday-watch
+  cancel-in-progress: true
+
+on:
+  schedule:
+    # 前場9:00-11:30・後場12:30-15:30(JST)を5分おきに監視。昼休みはスクリプト内でスキップ判定
+    - cron: "*/5 0-6 * * 1-5"
+  workflow_dispatch: {}
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Pythonをセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 依存パッケージをインストール
+        run: pip install yfinance requests
+
+      - name: 買いスコアを判定して通知
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python intraday_watch.py
+
+      - name: 状態(candidates.json・通知済みリスト)をコミット
+        if: always()
+        run: |
+          git config user.name "intraday-watch-bot"
+          git config user.email "actions@github.com"
+          git add state/notified_intraday.json || true
+          git diff --cached --quiet || git commit -m "update intraday watch state"
+          git pull --rebase || true
+          git push || true
