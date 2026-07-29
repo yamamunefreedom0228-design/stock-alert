@@ -224,6 +224,7 @@ def main():
 
     print(f"[INFO] 新規該当銘柄数: {len(new_hits)} (総該当 {len(all_hits)})")
     save_candidates(all_hits, name_map)
+
     if new_hits:
         send_discord(webhook_url, lines)
     else:
