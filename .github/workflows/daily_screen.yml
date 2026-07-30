@@ -1,8 +1,14 @@
 name: 株価スクリーニング通知(取引時間中)
 
+concurrency:
+  group: stock-screening
+  cancel-in-progress: true # 前の実行がまだ終わっていなければキャンセルして重複を防ぐ
+
 on:
+  # 前場9:00-11:30・後場12:30-15:30(JST)を10分おきにカバー
+  # UTCでは 0:00-6:50 の範囲(昼休みも含めて実行。無駄打ちはあるが実害はない)
   schedule:
-    - cron: "0,30 0-6 * * 1-5"
+    - cron: "*/10 0-6 * * 1-5"
   workflow_dispatch: {}
 
 jobs:
@@ -43,3 +49,10 @@ jobs:
         with:
           path: state/notified.json
           key: notify-state-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
+
+      - name: 候補銘柄を保存(intraday_watch向け)
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state/candidates.json
+          key: candidates-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
