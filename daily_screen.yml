@@ -2,7 +2,7 @@ name: 株価スクリーニング通知(取引時間中)
 
 concurrency:
   group: stock-screening
-  cancel-in-progress: true  # 前の実行がまだ終わっていなければキャンセルして重複を防ぐ
+  cancel-in-progress: true # 前の実行がまだ終わっていなければキャンセルして重複を防ぐ
 
 on:
   # 前場9:00-11:30・後場12:30-15:30(JST)を10分おきにカバー
@@ -25,9 +25,7 @@ jobs:
       - name: 当日分の通知済み状態を復元
         uses: actions/cache/restore@v4
         with:
-          path: |
-            state/notified.json
-            state/candidates.json
+          path: state/notified.json
           key: notify-state-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
           restore-keys: |
             notify-state-${{ steps.date.outputs.jst_date }}-
@@ -48,15 +46,13 @@ jobs:
       - name: 通知済み状態を保存(次回実行のため)
         if: always()
         uses: actions/cache/save@v4
-       with:
-          path: |
-            state/notified.json
-            state/candidates.json
+        with:
+          path: state/notified.json
           key: notify-state-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
+
       - name: 候補銘柄を保存(intraday_watch向け)
         if: always()
         uses: actions/cache/save@v4
         with:
           path: state/candidates.json
           key: candidates-${{ steps.date.outputs.jst_date }}-${{ github.run_id }}
-
